@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Flight: An extensible micro-framework.
  *
@@ -6,45 +7,43 @@
  * @license     MIT, http://flightphp.com/license
  */
 
-require_once 'vendor/autoload.php';
-require_once __DIR__.'/../flight/autoload.php';
+class VariableTest extends \PHPUnit\Framework\TestCase {
 
-class VariableTest extends \PHPUnit\Framework\TestCase
-{
     /**
      * @var \flight\Engine
      */
     private $app;
 
-    function setUp() {
+    function setUp(): void {
         $this->app = new \flight\Engine();
     }
+
     // Set and get a variable
     function testSetAndGet() {
-        $this->app->set('a', 1);
-        $var = $this->app->get('a');
-        $this->assertEquals(1, $var);
+        $this->app->set( 'a', 1 );
+        $var = $this->app->get( 'a' );
+        $this->assertEquals( 1, $var );
     }
 
     // Clear a specific variable
     function testClear() {
-        $this->app->set('b', 1);
-        $this->app->clear('b');
-        $var = $this->app->get('b');
-        $this->assertEquals(null, $var);
+        $this->app->set( 'b', 1 );
+        $this->app->clear( 'b' );
+        $var = $this->app->get( 'b' );
+        $this->assertEquals( null, $var );
     }
 
     // Clear all variables
     function testClearAll() {
-        $this->app->set('c', 1);
+        $this->app->set( 'c', 1 );
         $this->app->clear();
-        $var = $this->app->get('c');
-        $this->assertEquals(null, $var);
+        $var = $this->app->get( 'c' );
+        $this->assertEquals( null, $var );
     }
 
     // Check if a variable exists
     function testHas() {
-        $this->app->set('d', 1);
-        $this->assertTrue($this->app->has('d'));
+        $this->app->set( 'd', 1 );
+        $this->assertTrue( $this->app->has( 'd' ) );
     }
 }

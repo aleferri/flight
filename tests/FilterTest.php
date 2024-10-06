@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Flight: An extensible micro-framework.
  *
@@ -6,60 +7,60 @@
  * @license     MIT, http://flightphp.com/license
  */
 
-require_once 'vendor/autoload.php';
-require_once __DIR__.'/../flight/autoload.php';
+class FilterTest extends \PHPUnit\Framework\TestCase {
 
-class FilterTest extends \PHPUnit\Framework\TestCase
-{
     /**
      * @var \flight\Engine
      */
     private $app;
 
-    function setUp() {
+    function setUp(): void {
         $this->app = new \flight\Engine();
     }
 
     // Run before and after filters
     function testBeforeAndAfter() {
-        $this->app->map('hello', function($name){
+        $this->app->map( 'hello', function ( $name ) {
             return "Hello, $name!";
-        });
+        } );
 
-        $this->app->before('hello', function(&$params, &$output){
+        $this->app->before( 'hello',
+                            function ( &$params, &$output ) {
             // Manipulate the parameter
             $params[0] = 'Fred';
-        });
+        } );
 
-        $this->app->after('hello', function(&$params, &$output){
+        $this->app->after( 'hello',
+                           function ( &$params, &$output ) {
             // Manipulate the output
             $output .= " Have a nice day!";
-        });
+        } );
 
-        $result = $this->app->hello('Bob');
+        $result = $this->app->hello( 'Bob' );
 
-        $this->assertEquals('Hello, Fred! Have a nice day!', $result);
+        $this->assertEquals( 'Hello, Fred! Have a nice day!', $result );
     }
 
     // Break out of a filter chain by returning false
     function testFilterChaining() {
-        $this->app->map('bye', function($name){
+        $this->app->map( 'bye', function ( $name ) {
             return "Bye, $name!";
-        });
+        } );
 
-        $this->app->before('bye', function(&$params, &$output){
+        $this->app->before( 'bye', function ( &$params, &$output ) {
             $params[0] = 'Bob';
-        });
-        $this->app->before('bye', function(&$params, &$output){
+        } );
+        $this->app->before( 'bye',
+                            function ( &$params, &$output ) {
             $params[0] = 'Fred';
             return false;
-        });
-        $this->app->before('bye', function(&$params, &$output){
+        } );
+        $this->app->before( 'bye', function ( &$params, &$output ) {
             $params[0] = 'Ted';
-        });
+        } );
 
-        $result = $this->app->bye('Joe');
+        $result = $this->app->bye( 'Joe' );
 
-        $this->assertEquals('Bye, Fred!', $result);
+        $this->assertEquals( 'Bye, Fred!', $result );
     }
 }

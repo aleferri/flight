@@ -1,5 +1,5 @@
 {
-    "name": "mikecao/flight",
+    "name": "archi/flight",
     "description": "Flight is a fast, simple, extensible framework for PHP. Flight enables you to quickly and easily build RESTful web applications.",
     "homepage": "http://flightphp.com",
     "license": "MIT",
@@ -9,15 +9,21 @@
             "email": "mike@mikecao.com",
             "homepage": "http://www.mikecao.com/",
             "role": "Original Developer"
+        },
+        {
+            "name": "Alessio Ferri",
+            "role": "Mantainer"
         }
     ],
     "require": {
-        "php": ">=5.6.0"
+        "php": ">=7.2.0"
     },
     "autoload": {
-        "files": [ "flight/autoload.php", "flight/Flight.php" ]
+        "psr-4": {
+            "flight\\": "src/flight/"
+        }
     },
     "require-dev": {
-        "phpunit/phpunit": "^7"
+        "phpunit/phpunit": "^8"
     }
 }
