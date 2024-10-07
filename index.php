@@ -1,8 +1,14 @@
 <?php
+
 require 'flight/Flight.php';
 
-Flight::route('/', function(){
-    echo 'hello world!';
-});
+$app = Flight::app( 'test', __DIR__ );
 
-Flight::start();
+$router = $app->router();
+$router->get( '/', function () {
+    echo 'hello world!';
+} );
+
+$router = $app->router( 'customer_name' );
+
+$app->start();

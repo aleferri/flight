@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Flight: An extensible micro-framework.
  *
@@ -44,6 +45,7 @@ use flight\core\Dispatcher;
  * @method void lastModified(int $time) Handles last modified HTTP caching.
  */
 class Engine {
+
     /**
      * Stored variables.
      *
@@ -85,77 +87,83 @@ class Engine {
      * @return mixed Callback results
      * @throws \Exception
      */
-    public function __call($name, $params) {
-        $callback = $this->dispatcher->get($name);
+    public function __call( $name, $params ) {
+        $callback = $this->dispatcher->get( $name );
 
-        if (is_callable($callback)) {
-            return $this->dispatcher->run($name, $params);
+        if ( is_callable( $callback ) ) {
+            return $this->dispatcher->run( $name, $params );
         }
 
-        if (!$this->loader->get($name)) {
-            throw new \Exception("{$name} must be a mapped method.");
+        if ( !$this->loader->get( $name ) ) {
+            throw new \Exception( "{$name} must be a mapped method." );
         }
 
-        $shared = (!empty($params)) ? (bool)$params[0] : true;
+        if ( count( $params ) === 0 ) {
+            $shared = true;
+        } else {
+            $shared = $params[0];
+        }
 
-        return $this->loader->load($name, $shared);
+        return $this->loader->load( $name, $shared );
     }
 
-    /*** Core Methods ***/
+    /*     * * Core Methods ** */
 
     /**
      * Initializes the framework.
      */
     public function init() {
-        static $initialized = false;
         $self = $this;
 
-        if ($initialized) {
-            $this->vars = array();
-            $this->loader->reset();
-            $this->dispatcher->reset();
-        }
+        $this->vars = array();
+        $this->loader->reset();
+        $this->dispatcher->reset();
 
         // Register default components
-        $this->loader->register('request', '\flight\http\Request');
-        $this->loader->register('response', '\flight\http\Response');
-        $this->loader->register('router', '\flight\http\Router');
-        $this->loader->register('view', '\flight\template\View', array(), function($view) use ($self) {
-            $view->path = $self->get('flight.views.path');
-            $view->extension = $self->get('flight.views.extension');
-        });
+        $this->loader->register( 'request', '\flight\http\Request' );
+        $this->loader->register( 'response', '\flight\http\Response' );
+        $this->loader->register( 'router', '\flight\http\Router' );
+        $this->loader->register(
+                'view', '\flight\template\View', array(),
+                function ( $view ) use ( $self ) {
+                    $view->path = $self->get( 'flight.views.path' );
+                    $view->extension = $self->get( 'flight.views.extension' );
+                }
+        );
 
         // Register framework methods
         $methods = array(
-            'start','stop','route','halt','error','notFound',
-            'render','redirect','etag','lastModified','json',
+            'start', 'stop', 'route', 'halt', 'error', 'notFound',
+            'render', 'redirect', 'etag', 'lastModified', 'json',
             'jsonp', 'dispatchRoute'
         );
-        foreach ($methods as $name) {
-            $this->dispatcher->set($name, array($this, '_'.$name));
+
+        foreach ( $methods as $name ) {
+            $this->dispatcher->set( $name, array( $this, '_' . $name ) );
         }
 
         // Default configuration settings
-        $this->set('flight.base_url', null);
-        $this->set('flight.case_sensitive', false);
-        $this->set('flight.handle_errors', true);
-        $this->set('flight.log_errors', false);
-        $this->set('flight.views.path', './views');
-        $this->set('flight.views.extension', '.php');
+        $this->set( 'flight.base_url', null );
+        $this->set( 'flight.case_sensitive', false );
+        $this->set( 'flight.handle_errors', true );
+        $this->set( 'flight.log_errors', false );
+        $this->set( 'flight.views.path', './views' );
+        $this->set( 'flight.views.extension', '.php' );
 
         // Startup configuration
-        $this->before('start', function() use ($self) {
-            // Enable error handling
-            if ($self->get('flight.handle_errors')) {
-                set_error_handler(array($self, 'handleError'));
-                set_exception_handler(array($self, 'handleException'));
-            }
+        $this->before(
+                'start',
+                function () use ( $self ) {
+                    // Enable error handling
+                    if ( $self->get( 'flight.handle_errors' ) ) {
+                        set_error_handler( array( $self, 'handleError' ) );
+                        set_exception_handler( array( $self, 'handleException' ) );
+                    }
 
-            // Set case-sensitivity
-            $self->router()->case_sensitive = $self->get('flight.case_sensitive');
-        });
-
-        $initialized = true;
+                    // Set case-sensitivity
+                    $self->router()->case_sensitive = $self->get( 'flight.case_sensitive' );
+                }
+        );
     }
 
     /**
@@ -167,9 +175,9 @@ class Engine {
      * @param int $errline Error file line number
      * @throws \ErrorException
      */
-    public function handleError(int $errno, string $errstr, string $errfile, int $errline) {
-        if ($errno & error_reporting()) {
-            throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+    public function handleError( int $errno, string $errstr, string $errfile, int $errline ) {
+        if ( $errno & error_reporting() ) {
+            throw new \ErrorException( $errstr, $errno, 0, $errfile, $errline );
         }
     }
 
@@ -178,12 +186,12 @@ class Engine {
      *
      * @param \Exception $e Thrown exception
      */
-    public function handleException($e) {
-        if ($this->get('flight.log_errors')) {
-            error_log($e->getMessage());
+    public function handleException( $e ) {
+        if ( $this->get( 'flight.log_errors' ) ) {
+            error_log( $e->getMessage() );
         }
 
-        $this->error($e);
+        $this->error( $e );
     }
 
     /**
@@ -193,12 +201,12 @@ class Engine {
      * @param callback $callback Callback function
      * @throws \Exception If trying to map over a framework method
      */
-    public function map($name, $callback) {
-        if (method_exists($this, $name)) {
-            throw new \Exception('Cannot override an existing framework method.');
+    public function map( $name, $callback ) {
+        if ( method_exists( $this, $name ) ) {
+            throw new \Exception( 'Cannot override an existing framework method.' );
         }
 
-        $this->dispatcher->set($name, $callback);
+        $this->dispatcher->set( $name, $callback );
     }
 
     /**
@@ -210,12 +218,12 @@ class Engine {
      * @param callback $callback Function to call after object instantiation
      * @throws \Exception If trying to map over a framework method
      */
-    public function register($name, $class, array $params = array(), $callback = null) {
-        if (method_exists($this, $name)) {
-            throw new \Exception('Cannot override an existing framework method.');
+    public function register( $name, $class, array $params = array(), $callback = null ) {
+        if ( method_exists( $this, $name ) ) {
+            throw new \Exception( 'Cannot override an existing framework method.' );
         }
 
-        $this->loader->register($name, $class, $params, $callback);
+        $this->loader->register( $name, $class, $params, $callback );
     }
 
     /**
@@ -224,8 +232,8 @@ class Engine {
      * @param string $name Method name
      * @param callback $callback Callback function
      */
-    public function before($name, $callback) {
-        $this->dispatcher->hook($name, 'before', $callback);
+    public function before( $name, $callback ) {
+        $this->dispatcher->hook( $name, 'before', $callback );
     }
 
     /**
@@ -234,8 +242,8 @@ class Engine {
      * @param string $name Method name
      * @param callback $callback Callback function
      */
-    public function after($name, $callback) {
-        $this->dispatcher->hook($name, 'after', $callback);
+    public function after( $name, $callback ) {
+        $this->dispatcher->hook( $name, 'after', $callback );
     }
 
     /**
@@ -244,10 +252,12 @@ class Engine {
      * @param string $key Key
      * @return mixed
      */
-    public function get($key = null) {
-        if ($key === null) return $this->vars;
+    public function get( $key = null ) {
+        if ( $key === null ) {
+            return $this->vars;
+        }
 
-        return isset($this->vars[$key]) ? $this->vars[$key] : null;
+        return isset( $this->vars[$key] ) ? $this->vars[$key] : null;
     }
 
     /**
@@ -256,13 +266,12 @@ class Engine {
      * @param mixed $key Key
      * @param string $value Value
      */
-    public function set($key, $value = null) {
-        if (is_array($key) || is_object($key)) {
-            foreach ($key as $k => $v) {
+    public function set( $key, $value = null ) {
+        if ( is_array( $key ) || is_object( $key ) ) {
+            foreach ( $key as $k => $v ) {
                 $this->vars[$k] = $v;
             }
-        }
-        else {
+        } else {
             $this->vars[$key] = $value;
         }
     }
@@ -273,8 +282,8 @@ class Engine {
      * @param string $key Key
      * @return bool Variable status
      */
-    public function has($key) {
-        return isset($this->vars[$key]);
+    public function has( $key ) {
+        return isset( $this->vars[$key] );
     }
 
     /**
@@ -282,12 +291,11 @@ class Engine {
      *
      * @param string $key Key
      */
-    public function clear($key = null) {
-        if (is_null($key)) {
+    public function clear( $key = null ) {
+        if ( is_null( $key ) ) {
             $this->vars = array();
-        }
-        else {
-            unset($this->vars[$key]);
+        } else {
+            unset( $this->vars[$key] );
         }
     }
 
@@ -297,11 +305,11 @@ class Engine {
      * @param Route $route Flight Route object
      * @param array $params array of params for the route callback
      */
-    public function _dispatchRoute($route, array $params) {
+    public function _dispatchRoute( $route, array $params ) {
         return ($route->callback)( ...$params );
     }
 
-    /*** Extensible Methods ***/
+    /*     * * Extensible Methods ** */
 
     /**
      * Starts the framework.
@@ -316,64 +324,67 @@ class Engine {
         $router = $this->router();
 
         // Allow filters to run
-        $this->after('start', function() use ($self) {
+        $this->after( 'start', function () use ( $self ) {
             $self->stop();
-        });
+        } );
 
         // Flush any existing output
-        if (ob_get_length() > 0) {
-            $response->write(ob_get_clean());
+        if ( ob_get_length() > 0 ) {
+            $response->write( ob_get_clean() );
         }
 
         // Enable output buffering
         ob_start();
 
         // Route the request
-        while ($route = $router->route($request)) {
-            $params = array_values($route->params);
+        while ( $route = $router->route( $request ) ) {
+            $params = array_values( $route->params );
 
-            if (isset($route->config['pass_route']) && $route->config['pass_route']) {
+            if ( isset( $route->config['pass_route'] ) && $route->config['pass_route'] ) {
                 $params[] = $route;
             }
 
             // Call route handler
-            $continue = $this->dispatchRoute($route, $params);
+            $continue = $this->dispatchRoute( $route, $params );
 
             $dispatched = true;
 
-            if (!$continue) break;
+            if ( !$continue )
+                break;
 
             $dispatched = false;
         }
 
-        if (!$dispatched) {
+        if ( !$dispatched ) {
             $this->notFound();
         }
     }
 
-    public function routeRequest(Request $request, Response $response, array $layers = []) {
+    public function routeRequest( Request $request, Response $response, array $layers = [] ) {
         // Enable output buffering
         ob_start();
 
         // Route the request
-        while ($route = $router->route($request)) {
-            $params = array_values($route->params);
+        while ( $route = $this->router->route( $request ) ) {
+            $params = array_values( $route->params );
 
-            if (isset($route->config['pass_route']) && $route->config['pass_route']) {
+            if ( isset( $route->config['pass_route'] ) && $route->config['pass_route'] ) {
                 $params[] = $route;
             }
 
             // Call route handler
-            $continue = $this->dispatchRoute($route, $params);
+            $continue = $this->dispatchRoute( $route, $params );
 
             $dispatched = true;
 
-            if (!$continue) break;
+            if ( !$continue ) {
+                break;
+            }
 
             $dispatched = false;
         }
 
-        if (!$dispatched) {
+        if ( !$dispatched ) {
             $this->notFound();
         }
 
@@ -388,15 +399,15 @@ class Engine {
      * @param int $code HTTP status code
      * @throws \Exception
      */
-    public function _stop($code = null) {
+    public function _stop( $code = null ) {
         $response = $this->response();
 
-        if (!$response->sent()) {
-            if ($code !== null) {
-                $response->status($code);
+        if ( !$response->sent() ) {
+            if ( $code !== null ) {
+                $response->status( $code );
             }
 
-            $response->write(ob_get_clean());
+            $response->write( ob_get_clean() );
 
             $response->send();
         }
@@ -409,13 +420,13 @@ class Engine {
      * @param callback $callback Callback function
      * @param boolean|array $route_params Pass the matching route object to the callback
      */
-    public function _route(string $pattern, $callback, $route_params = false) {
+    public function _route( string $pattern, $callback, $route_params = false ) {
         if ( $route_params === false || $route_params === true ) {
             $config = [ 'pass_route' => $route_params ];
         } else {
             $config = $route_params;
         }
-        $this->router()->map($pattern, $callback, $config);
+        $this->router()->map( $pattern, $callback, $config );
     }
 
     /**
@@ -424,12 +435,12 @@ class Engine {
      * @param int $code HTTP status code
      * @param string $message Response message
      */
-    public function _halt($code = 200, $message = '') {
+    public function _halt( $code = 200, $message = '' ) {
         $this->response()
-            ->clear()
-            ->status($code)
-            ->write($message)
-            ->send();
+                ->clear()
+                ->status( $code )
+                ->write( $message )
+                ->send();
         exit();
     }
 
@@ -438,26 +449,21 @@ class Engine {
      *
      * @param \Exception|\Throwable $e Thrown exception
      */
-    public function _error($e) {
-        $msg = sprintf('<h1>500 Internal Server Error</h1>'.
-            '<h3>%s (%s)</h3>'.
-            '<pre>%s</pre>',
-            $e->getMessage(),
-            $e->getCode(),
-            $e->getTraceAsString()
+    public function _error( $e ) {
+        $msg = sprintf(
+                '<h1>500 Internal Server Error</h1>' .
+                '<h3>%s (%s)</h3>' .
+                '<pre>%s</pre>', $e->getMessage(), $e->getCode(), $e->getTraceAsString()
         );
 
         try {
             $this->response()
-                ->clear()
-                ->status(500)
-                ->write($msg)
-                ->send();
-        }
-        catch (\Throwable $t) { // PHP 7.0+
-            exit($msg);
-        } catch(\Exception $e) { // PHP < 7
-            exit($msg);
+                    ->clear()
+                    ->status( 500 )
+                    ->write( $msg )
+                    ->send();
+        } catch ( \Throwable $t ) {
+            exit( $msg );
         }
     }
 
@@ -466,14 +472,14 @@ class Engine {
      */
     public function _notFound() {
         $this->response()
-            ->clear()
-            ->status(404)
-            ->write(
-                '<h1>404 Not Found</h1>'.
-                '<h3>The page you have requested could not be found.</h3>'.
-                str_repeat(' ', 512)
-            )
-            ->send();
+                ->clear()
+                ->status( 404 )
+                ->write(
+                        '<h1>404 Not Found</h1>' .
+                        '<h3>The page you have requested could not be found.</h3>' .
+                        str_repeat( ' ', 512 )
+                )
+                ->send();
     }
 
     /**
@@ -482,23 +488,23 @@ class Engine {
      * @param string $url URL
      * @param int $code HTTP status code
      */
-    public function _redirect($url, $code = 303) {
-        $base = $this->get('flight.base_url');
+    public function _redirect( $url, $code = 303 ) {
+        $base = $this->get( 'flight.base_url' );
 
-        if ($base === null) {
+        if ( $base === null ) {
             $base = $this->request()->base;
         }
 
         // Append base url to redirect url
-        if ($base != '/' && strpos($url, '://') === false) {
-            $url = $base . preg_replace('#/+#', '/', '/' . $url);
+        if ( $base != '/' && strpos( $url, '://' ) === false ) {
+            $url = $base . preg_replace( '#/+#', '/', '/' . $url );
         }
 
         $this->response()
-            ->clear()
-            ->status($code)
-            ->header('Location', $url)
-            ->send();
+                ->clear()
+                ->status( $code )
+                ->header( 'Location', $url )
+                ->send();
     }
 
     /**
@@ -509,12 +515,11 @@ class Engine {
      * @param string $key View variable name
      * @throws \Exception
      */
-    public function _render($file, $data = null, $key = null) {
-        if ($key !== null) {
-            $this->view()->set($key, $this->view()->fetch($file, $data));
-        }
-        else {
-            $this->view()->render($file, $data);
+    public function _render( $file, $data = null, $key = null ) {
+        if ( $key !== null ) {
+            $this->view()->set( $key, $this->view()->fetch( $file, $data ) );
+        } else {
+            $this->view()->render( $file, $data );
         }
     }
 
@@ -529,19 +534,15 @@ class Engine {
      * @throws \Exception
      */
     public function _json(
-        $data,
-        $code = 200,
-        $encode = true,
-        $charset = 'utf-8',
-        $option = 0
+            $data, $code = 200, $encode = true, $charset = 'utf-8', $option = 0
     ) {
-        $json = ($encode) ? json_encode($data, $option) : $data;
+        $json = ($encode) ? json_encode( $data, $option ) : $data;
 
         $this->response()
-            ->status($code)
-            ->header('Content-Type', 'application/json; charset='.$charset)
-            ->write($json)
-            ->send();
+                ->status( $code )
+                ->header( 'Content-Type', 'application/json; charset=' . $charset )
+                ->write( $json )
+                ->send();
     }
 
     /**
@@ -556,22 +557,17 @@ class Engine {
      * @throws \Exception
      */
     public function _jsonp(
-        $data,
-        $param = 'jsonp',
-        $code = 200,
-        $encode = true,
-        $charset = 'utf-8',
-        $option = 0
+            $data, $param = 'jsonp', $code = 200, $encode = true, $charset = 'utf-8', $option = 0
     ) {
-        $json = ($encode) ? json_encode($data, $option) : $data;
+        $json = ($encode) ? json_encode( $data, $option ) : $data;
 
         $callback = $this->request()->query[$param];
 
         $this->response()
-            ->status($code)
-            ->header('Content-Type', 'application/javascript; charset='.$charset)
-            ->write($callback.'('.$json.');')
-            ->send();
+                ->status( $code )
+                ->header( 'Content-Type', 'application/javascript; charset=' . $charset )
+                ->write( $callback . '(' . $json . ');' )
+                ->send();
     }
 
     /**
@@ -580,14 +576,14 @@ class Engine {
      * @param string $id ETag identifier
      * @param string $type ETag type
      */
-    public function _etag($id, $type = 'strong') {
-        $id = (($type === 'weak') ? 'W/' : '').$id;
+    public function _etag( $id, $type = 'strong' ) {
+        $id = (($type === 'weak') ? 'W/' : '') . $id;
 
-        $this->response()->header('ETag', $id);
+        $this->response()->header( 'ETag', $id );
 
-        if (isset($_SERVER['HTTP_IF_NONE_MATCH']) &&
-            $_SERVER['HTTP_IF_NONE_MATCH'] === $id) {
-            $this->halt(304);
+        if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) &&
+                $_SERVER['HTTP_IF_NONE_MATCH'] === $id ) {
+            $this->halt( 304 );
         }
     }
 
@@ -596,12 +592,12 @@ class Engine {
      *
      * @param int $time Unix timestamp
      */
-    public function _lastModified($time) {
-        $this->response()->header('Last-Modified', gmdate('D, d M Y H:i:s \G\M\T', $time));
+    public function _lastModified( $time ) {
+        $this->response()->header( 'Last-Modified', gmdate( 'D, d M Y H:i:s \G\M\T', $time ) );
 
-        if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) &&
-            strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) === $time) {
-            $this->halt(304);
+        if ( isset( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) &&
+                strtotime( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ) === $time ) {
+            $this->halt( 304 );
         }
     }
 }

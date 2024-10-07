@@ -38,7 +38,7 @@ class Router {
     public $case_sensitive;
 
     public function __construct() {
-        $this->routes         = [
+        $this->routes = [
             'GET'     => [],
             'POST'    => [],
             'PUT'     => [],
@@ -47,7 +47,7 @@ class Router {
             'OPTIONS' => [],
             'HEAD'    => []
         ];
-        $this->index          = 0;
+        $this->index = 0;
         $this->case_sensitive = false;
     }
 
@@ -74,13 +74,13 @@ class Router {
      * @param callback $callback Callback function
      * @param array $config Pass the matching route object to the callback
      */
-    public function map( $pattern, $callback, array $config = [] ) {
-        $url     = trim( $pattern );
+    public function map( $pattern, $callback, array $config = [] ): Route {
+        $url = trim( $pattern );
         $methods = [ 'GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD' ];
 
         if ( strpos( $url, ' ' ) !== false ) {
             list($method, $url) = explode( ' ', $url, 2 );
-            $url     = trim( $url );
+            $url = trim( $url );
             $methods = explode( '|', $method );
         }
 
@@ -88,6 +88,63 @@ class Router {
         foreach ( $methods as $method ) {
             $this->routes[$method][] = $route;
         }
+        
+        return $route;
+    }
+
+    /**
+     * Maps a HEAD URL pattern to a callback function.
+     *
+     * @param string $pattern URL pattern to match
+     * @param callback $callback Callback function
+     * @param array $config Pass the matching route object to the callback
+     */
+    public function head( $pattern, $callback, array $config = [] ): Route {
+        return $this->map( 'HEAD ' . $pattern, $callback, $config );
+    }
+    
+    /**
+     * Maps a GET URL pattern to a callback function.
+     *
+     * @param string $pattern URL pattern to match
+     * @param callback $callback Callback function
+     * @param array $config Pass the matching route object to the callback
+     */
+    public function get( $pattern, $callback, array $config = [] ): Route {
+        return $this->map( 'GET ' . $pattern, $callback, $config );
+    }
+    
+    /**
+     * Maps a POST URL pattern to a callback function.
+     *
+     * @param string $pattern URL pattern to match
+     * @param callback $callback Callback function
+     * @param array $config Pass the matching route object to the callback
+     */
+    public function post( $pattern, $callback, array $config = [] ): Route {
+        return $this->map( 'POST ' . $pattern, $callback, $config );
+    }
+    
+    /**
+     * Maps a PUT URL pattern to a callback function.
+     *
+     * @param string $pattern URL pattern to match
+     * @param callback $callback Callback function
+     * @param array $config Pass the matching route object to the callback
+     */
+    public function put( $pattern, $callback, array $config = [] ): Route {
+        return $this->map( 'PUT ' . $pattern, $callback, $config );
+    }
+    
+    /**
+     * Maps a DELETE URL pattern to a callback function.
+     *
+     * @param string $pattern URL pattern to match
+     * @param callback $callback Callback function
+     * @param array $config Pass the matching route object to the callback
+     */
+    public function delete( $pattern, $callback, array $config = [] ): Route {
+        return $this->map( 'DELETE ' . $pattern, $callback, $config );
     }
 
     /**

@@ -32,7 +32,7 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
     // Test get/set of variables
     function testGetAndSet() {
         $app = Flight::app();
-        
+
         $app->set( 'a', 1 );
         $var = $app->get( 'a' );
 
@@ -54,7 +54,7 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
 
     // Register a class
     function testRegister() {
-        $app = Flight::app();
+        $app  = Flight::app();
         $app->register( 'user', User::class );
         $user = $app->user();
 
@@ -65,7 +65,7 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
     // Map a function
     function testMap() {
         $app = Flight::app();
-        
+
         $app->map( 'map1', function () {
             return 'hello';
         } );
@@ -73,6 +73,15 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
         $result = $app->map1();
 
         $this->assertEquals( 'hello', $result );
+    }
+
+    function testNamedInstances() {
+        $app = Flight::app( 'test', __DIR__ );
+
+        $router  = $app->router();
+        $another = $app->router( 'another' );
+
+        $this->assertFalse( $router === $another );
     }
 
     // Unmapped method
