@@ -30,17 +30,38 @@ class Response {
      * @var string HTTP response body
      */
     protected $body = '';
-    
+
     /**
-     * 
+     *
      * @var string response file path
      */
     protected $file_path = '';
 
     /**
+     *
+     * @var bool continue dispatching
+     */
+    protected $complete = true;
+
+    /**
      * @var bool HTTP response sent
      */
     protected $sent = false;
+
+    /**
+     * Chain the response
+     */
+    public function set_complete($complete): void {
+        $this->complete = $complete;
+    }
+
+    /**
+     *
+     * @return bool
+     */
+    public function is_complete(): bool {
+        return $this->complete;
+    }
 
     /**
      * Sets the HTTP status of the response.
@@ -49,7 +70,7 @@ class Response {
      * @return object|int Self reference
      * @throws \Exception If invalid status code
      */
-    public function status( ?int $code = null ): self {
+    public function status(?int $code = null): self {
         if ( $code === null ) {
             return $this->status;
         }
@@ -70,16 +91,20 @@ class Response {
      * @param string $value Header value
      * @return object Self reference
      */
-    public function header( string $name, ?string $value = null ): self {
+    public function header(string $name, ?string $value = null): self {
         if ( is_array( $name ) ) {
             foreach ( $name as $k => $v ) {
-                $this->headers[$k] = $v;
+                $this->headers[ $k ] = $v;
             }
         } else {
-            $this->headers[$name] = $value;
+            $this->headers[ $name ] = $value;
         }
 
         return $this;
+    }
+
+    public function file(string $path) {
+        $this->file_path = $path;
     }
 
     /**
@@ -96,7 +121,7 @@ class Response {
      * @param string $str Response content
      * @return object Self reference
      */
-    public function write( string $str ): self {
+    public function write(string $str): self {
         $this->body .= $str;
 
         return $this;
@@ -108,9 +133,9 @@ class Response {
      * @return object Self reference
      */
     public function clear(): self {
-        $this->status  = 200;
+        $this->status = 200;
         $this->headers = array();
-        $this->body    = '';
+        $this->body = '';
 
         return $this;
     }
@@ -121,21 +146,21 @@ class Response {
      * @param int|string $expires Expiration time
      * @return object Self reference
      */
-    public function cache( $expires ): self {
+    public function cache($expires): self {
         if ( $expires === false ) {
-            $this->headers['Expires']       = 'Mon, 26 Jul 1997 05:00:00 GMT';
-            $this->headers['Cache-Control'] = array(
+            $this->headers[ 'Expires' ] = 'Mon, 26 Jul 1997 05:00:00 GMT';
+            $this->headers[ 'Cache-Control' ] = array(
                 'no-store, no-cache, must-revalidate',
                 'post-check=0, pre-check=0',
                 'max-age=0'
             );
-            $this->headers['Pragma']        = 'no-cache';
+            $this->headers[ 'Pragma' ] = 'no-cache';
         } else {
-            $expires                        = is_int( $expires ) ? $expires : strtotime( $expires );
-            $this->headers['Expires']       = gmdate( 'D, d M Y H:i:s', $expires ) . ' GMT';
-            $this->headers['Cache-Control'] = 'max-age=' . ($expires - time());
-            if ( isset( $this->headers['Pragma'] ) && $this->headers['Pragma'] == 'no-cache' ) {
-                unset( $this->headers['Pragma'] );
+            $expires = is_int( $expires ) ? $expires : strtotime( $expires );
+            $this->headers[ 'Expires' ] = gmdate( 'D, d M Y H:i:s', $expires ) . ' GMT';
+            $this->headers[ 'Cache-Control' ] = 'max-age=' . ($expires - time());
+            if ( isset( $this->headers[ 'Pragma' ] ) && $this->headers[ 'Pragma' ] == 'no-cache' ) {
+                unset( $this->headers[ 'Pragma' ] );
             }
         }
         return $this;
@@ -150,16 +175,16 @@ class Response {
         // Send status code header
         if ( strpos( php_sapi_name(), 'cgi' ) !== false ) {
             header(
-                    sprintf(
-                            'Status: %d %s', $this->status, self::$codes[$this->status]
-                    ), true
+                sprintf(
+                    'Status: %d %s', $this->status, self::$codes[ $this->status ]
+                ), true
             );
         } else {
             header(
-                    sprintf(
-                            '%s %d %s', (isset( $_SERVER['SERVER_PROTOCOL'] ) ? $_SERVER['SERVER_PROTOCOL'] : 'HTTP/1.1' ),
-                    $this->status, self::$codes[$this->status]
-                    ), true, $this->status
+                sprintf(
+                    '%s %d %s', (isset( $_SERVER[ 'SERVER_PROTOCOL' ] ) ? $_SERVER[ 'SERVER_PROTOCOL' ] : 'HTTP/1.1' ),
+                    $this->status, self::$codes[ $this->status ]
+                ), true, $this->status
             );
         }
 
@@ -191,8 +216,8 @@ class Response {
      */
     public function getContentLength(): int {
         return extension_loaded( 'mbstring' ) ?
-                mb_strlen( $this->body, 'latin1' ) :
-                strlen( $this->body );
+            mb_strlen( $this->body, 'latin1' ) :
+            strlen( $this->body );
     }
 
     /**
@@ -210,12 +235,17 @@ class Response {
             ob_end_clean();
         }
 
-        if ( !headers_sent() ) {
+        if ( ! headers_sent() ) {
             $this->sendHeaders();
         }
 
-        echo $this->body;
+        if ( $this->file_path !== '' ) {
+            readfile( $this->file_path );
+        } else {
+            echo $this->body;
+        }
 
         $this->sent = true;
     }
+
 }

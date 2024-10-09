@@ -76,6 +76,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @param string $offset Offset
      * @return mixed Value
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset) {
         return isset( $this->data[ $offset ] ) ? $this->data[ $offset ] : null;
     }
@@ -125,6 +126,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      *
      * @return mixed Value
      */
+    #[\ReturnTypeWillChange]
     public function current() {
         return current( $this->data );
     }
@@ -134,6 +136,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      *
      * @return mixed Value
      */
+    #[\ReturnTypeWillChange]
     public function key() {
         return key( $this->data );
     }
