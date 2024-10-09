@@ -134,7 +134,7 @@ class Engine {
         // Register framework methods
         $methods = array(
             'start', 'stop', 'route', 'halt', 'error', 'notFound',
-            'render', 'redirect', 'etag', 'lastModified', 'json',
+            'render', 'redirect', 'allow_cross_origin', 'etag', 'lastModified', 'json',
             'jsonp', 'dispatchRoute'
         );
 
@@ -435,8 +435,7 @@ class Engine {
             $this->response()
                 ->clear()
                 ->status( 500 )
-                ->write( $msg )
-                ->send();
+                ->write( $msg );
         } catch ( \Throwable $t ) {
             exit( $msg );
         }
@@ -478,6 +477,35 @@ class Engine {
                 ->clear()
                 ->status( $code )
                 ->header( 'Location', $url );
+    }
+
+    public function _allow_cross_origin(http\Request $request): http\Response {
+        $response = $this->response();
+
+        if ( isset( $_SERVER[ 'HTTP_ORIGIN' ] ) ) {
+            // Allow source
+            $response->header( 'Access-Control-Allow-Origin', $_SERVER[ 'HTTP_ORIGIN' ] )
+                ->header( 'Access-Control-Allow-Credentials', true )
+                ->header( 'Access-Control-Max-Age', 86400 );
+        } else if ( isset( $_SERVER[ 'HTTP_SEC_FETCH_SITE' ] ) ) {
+            $response->header( 'Access-Control-Allow-Origin', '*' )
+                ->header( 'Access-Control-Allow-Credentials', true )
+                ->header( 'Access-Control-Max-Age', 86400 );
+        }
+
+        // Access-Control headers are received during OPTIONS requests
+        if ( $request->method === 'OPTIONS' ) {
+            if ( isset( $_SERVER[ 'HTTP_ACCESS_CONTROL_REQUEST_METHOD' ] ) ) {
+                $response->header( 'Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS' );
+            }
+
+            if ( isset( $_SERVER[ 'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' ] ) ) {
+                $response->header( 'Access-Control-Allow-Methods', $_SERVER[ 'HTTP_ACCESS_CONTROL_REQUEST_HEADERS' ] );
+            }
+            $response->status( 200 );
+        }
+
+        return $response;
     }
 
     /**
