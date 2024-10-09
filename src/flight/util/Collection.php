@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Flight: An extensible micro-framework.
  *
@@ -13,6 +14,7 @@ namespace flight\util;
  * using both array and object notation.
  */
 class Collection implements \ArrayAccess, \Iterator, \Countable {
+
     /**
      * Collection data.
      *
@@ -36,7 +38,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @return mixed Value
      */
     public function __get($key) {
-        return isset($this->data[$key]) ? $this->data[$key] : null;
+        return isset( $this->data[ $key ] ) ? $this->data[ $key ] : null;
     }
 
     /**
@@ -46,7 +48,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @param mixed $value Value
      */
     public function __set($key, $value) {
-        $this->data[$key] = $value;
+        $this->data[ $key ] = $value;
     }
 
     /**
@@ -56,7 +58,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @return bool Item status
      */
     public function __isset($key) {
-        return isset($this->data[$key]);
+        return isset( $this->data[ $key ] );
     }
 
     /**
@@ -65,7 +67,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @param string $key Key
      */
     public function __unset($key) {
-        unset($this->data[$key]);
+        unset( $this->data[ $key ] );
     }
 
     /**
@@ -75,7 +77,7 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @return mixed Value
      */
     public function offsetGet($offset) {
-        return isset($this->data[$offset]) ? $this->data[$offset] : null;
+        return isset( $this->data[ $offset ] ) ? $this->data[ $offset ] : null;
     }
 
     /**
@@ -84,12 +86,11 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @param string $offset Offset
      * @param mixed $value Value
      */
-    public function offsetSet($offset, $value) {
-        if (is_null($offset)) {
+    public function offsetSet($offset, $value): void {
+        if ( is_null( $offset ) ) {
             $this->data[] = $value;
-        }
-        else {
-            $this->data[$offset] = $value;
+        } else {
+            $this->data[ $offset ] = $value;
         }
     }
 
@@ -99,8 +100,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      * @param string $offset Offset
      * @return bool Item status
      */
-    public function offsetExists($offset) {
-        return isset($this->data[$offset]);
+    public function offsetExists($offset): bool {
+        return isset( $this->data[ $offset ] );
     }
 
     /**
@@ -108,53 +109,51 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      *
      * @param string $offset Offset
      */
-    public function offsetUnset($offset) {
-        unset($this->data[$offset]);
+    public function offsetUnset($offset): void {
+        unset( $this->data[ $offset ] );
     }
 
     /**
      * Resets the collection.
      */
-    public function rewind() {
-        reset($this->data);
+    public function rewind(): void {
+        reset( $this->data );
     }
- 
+
     /**
      * Gets current collection item.
      *
      * @return mixed Value
-     */ 
+     */
     public function current() {
-        return current($this->data);
+        return current( $this->data );
     }
- 
+
     /**
      * Gets current collection key.
      *
      * @return mixed Value
-     */ 
+     */
     public function key() {
-        return key($this->data);
+        return key( $this->data );
     }
- 
+
     /**
      * Gets the next collection value.
      *
      * @return mixed Value
-     */ 
-    public function next() 
-    {
-        return next($this->data);
+     */
+    public function next(): void {
+        next( $this->data );
     }
- 
+
     /**
      * Checks if the current collection key is valid.
      *
      * @return bool Key status
-     */ 
-    public function valid()
-    {
-        $key = key($this->data);
+     */
+    public function valid(): bool {
+        $key = key( $this->data );
         return ($key !== NULL && $key !== FALSE);
     }
 
@@ -163,8 +162,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      *
      * @return int Collection size
      */
-    public function count() {
-        return sizeof($this->data);
+    public function count(): int {
+        return sizeof( $this->data );
     }
 
     /**
@@ -172,8 +171,8 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
      *
      * @return array Collection keys
      */
-    public function keys() {
-        return array_keys($this->data);
+    public function keys(): array {
+        return array_keys( $this->data );
     }
 
     /**
@@ -200,4 +199,5 @@ class Collection implements \ArrayAccess, \Iterator, \Countable {
     public function clear() {
         $this->data = array();
     }
+
 }
