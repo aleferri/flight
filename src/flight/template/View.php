@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Flight: An extensible micro-framework.
  *
@@ -14,6 +15,7 @@ namespace flight\template;
  * view templates upon rendering.
  */
 class View {
+
     /**
      * Location of view templates.
      *
@@ -58,7 +60,7 @@ class View {
      * @return mixed Value
      */
     public function get($key) {
-        return isset($this->vars[$key]) ? $this->vars[$key] : null;
+        return isset( $this->vars[ $key ] ) ? $this->vars[ $key ] : null;
     }
 
     /**
@@ -68,13 +70,12 @@ class View {
      * @param string $value Value
      */
     public function set($key, $value = null) {
-        if (is_array($key) || is_object($key)) {
-            foreach ($key as $k => $v) {
-                $this->vars[$k] = $v;
+        if ( is_array( $key ) || is_object( $key ) ) {
+            foreach ( $key as $k => $v ) {
+                $this->vars[ $k ] = $v;
             }
-        }
-        else {
-            $this->vars[$key] = $value;
+        } else {
+            $this->vars[ $key ] = $value;
         }
     }
 
@@ -85,7 +86,7 @@ class View {
      * @return boolean If key exists
      */
     public function has($key) {
-        return isset($this->vars[$key]);
+        return isset( $this->vars[ $key ] );
     }
 
     /**
@@ -94,11 +95,10 @@ class View {
      * @param string $key Key
      */
     public function clear($key = null) {
-        if (is_null($key)) {
+        if ( is_null( $key ) ) {
             $this->vars = array();
-        }
-        else {
-            unset($this->vars[$key]);
+        } else {
+            unset( $this->vars[ $key ] );
         }
     }
 
@@ -110,17 +110,17 @@ class View {
      * @throws \Exception If template not found
      */
     public function render($file, $data = null) {
-        $this->template = $this->getTemplate($file);
+        $this->template = $this->getTemplate( $file );
 
-        if (!file_exists($this->template)) {
-            throw new \Exception("Template file not found: {$this->template}.");
+        if ( ! file_exists( $this->template ) ) {
+            throw new \Exception( "Template file not found: {$this->template}." );
         }
 
-        if (is_array($data)) {
-            $this->vars = array_merge($this->vars, $data);
+        if ( is_array( $data ) ) {
+            $this->vars = array_merge( $this->vars, $data );
         }
 
-        extract($this->vars);
+        extract( $this->vars );
 
         include $this->template;
     }
@@ -135,7 +135,7 @@ class View {
     public function fetch($file, $data = null) {
         ob_start();
 
-        $this->render($file, $data);
+        $this->render( $file, $data );
         $output = ob_get_clean();
 
         return $output;
@@ -148,7 +148,7 @@ class View {
      * @return bool Template file exists
      */
     public function exists($file) {
-        return file_exists($this->getTemplate($file));
+        return file_exists( $this->getTemplate( $file ) );
     }
 
     /**
@@ -160,15 +160,15 @@ class View {
     public function getTemplate($file) {
         $ext = $this->extension;
 
-        if (!empty($ext) && (substr($file, -1 * strlen($ext)) != $ext)) {
+        if ( ! empty( $ext ) && (substr( $file, -1 * strlen( $ext ) ) != $ext) ) {
             $file .= $ext;
         }
 
-        if ((substr($file, 0, 1) == '/')) {
+        if ( (substr( $file, 0, 1 ) == '/' ) ) {
             return $file;
         }
-        
-        return $this->path.'/'.$file;
+
+        return $this->path . '/' . $file;
     }
 
     /**
@@ -178,7 +178,7 @@ class View {
      * @return string Escaped string
      */
     public function e($str) {
-        echo htmlentities($str);
+        echo htmlentities( $str );
     }
-}
 
+}

@@ -18,10 +18,10 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
 
     // Checks that default components are loaded
     function testDefaultComponents() {
-        $request  = Flight::request();
+        $request = Flight::request();
         $response = Flight::response();
-        $router   = Flight::router();
-        $view     = Flight::view();
+        $router = Flight::router();
+        $view = Flight::view();
 
         $this->assertEquals( 'flight\http\Request', get_class( $request ) );
         $this->assertEquals( 'flight\http\Response', get_class( $response ) );
@@ -48,13 +48,13 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
         $vars = $app->get();
 
         $this->assertEquals( 2, count( $vars ) );
-        $this->assertEquals( 1, $vars['a'] );
-        $this->assertEquals( 2, $vars['b'] );
+        $this->assertEquals( 1, $vars[ 'a' ] );
+        $this->assertEquals( 2, $vars[ 'b' ] );
     }
 
     // Register a class
     function testRegister() {
-        $app  = Flight::app();
+        $app = Flight::app();
         $app->register( 'user', User::class );
         $user = $app->user();
 
@@ -78,7 +78,7 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
     function testNamedInstances() {
         $app = Flight::app( 'test', __DIR__ );
 
-        $router  = $app->router();
+        $router = $app->router();
         $another = $app->router( 'another' );
 
         $this->assertFalse( $router === $another );
@@ -91,4 +91,21 @@ class FlightTest extends \PHPUnit\Framework\TestCase {
 
         Flight::doesNotExist();
     }
+
+    function testStart() {
+        $app = Flight::app( 'test', __DIR__ );
+
+        $app->request()->method = 'GET';
+        $app->request()->url = '/uuu';
+
+        $app->route( 'GET /uuu', [ $this, 'sample' ] );
+
+        $app->start();
+        $this->expectOutputString( "sample" );
+    }
+
+    function sample() {
+        echo "sample";
+    }
+
 }
