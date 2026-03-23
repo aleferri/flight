@@ -31,12 +31,12 @@ use Psr\Container\ContainerInterface;
  * @method void stop()
  * @method void halt(int $code = 200, string $message = '', bool $actuallyExit = true)
  * @method EventDispatcher eventDispatcher()
- * @method Route route(string $pattern, callable|string|array $callback, bool $pass_route = false, string $alias = '')
+ * @method Route route(string $pattern, callable|string|array $callback, bool|array $route_config = false, string $alias = '')
  * @method void group(string $pattern, callable $callback, array $group_middlewares = [])
- * @method Route post(string $pattern, callable|string|array $callback, bool $pass_route = false, string $alias = '')
- * @method Route put(string $pattern, callable|string|array $callback, bool $pass_route = false, string $alias = '')
- * @method Route patch(string $pattern, callable|string|array $callback, bool $pass_route = false, string $alias = '')
- * @method Route delete(string $pattern, callable|string|array $callback, bool $pass_route = false, string $alias = '')
+ * @method Route post(string $pattern, callable|string|array $callback, bool|array $route_config = false, string $alias = '')
+ * @method Route put(string $pattern, callable|string|array $callback, bool|array $route_config = false, string $alias = '')
+ * @method Route patch(string $pattern, callable|string|array $callback, bool|array $route_config = false, string $alias = '')
+ * @method Route delete(string $pattern, callable|string|array $callback, bool|array $route_config = false, string $alias = '')
  * @method void resource(string $pattern, string $controllerClass, array $methods = [])
  * @method Router router()
  * @method string getUrl(string $alias)
@@ -59,12 +59,12 @@ use Psr\Container\ContainerInterface;
  *
  * @phpstan-template EngineTemplate of object
  * @phpstan-method void registerContainerHandler(ContainerInterface|callable(class-string<EngineTemplate> $id, array<int|string, mixed> $params): ?EngineTemplate $containerHandler)
- * @phpstan-method Route route(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool $pass_route = false, string $alias = '')
+ * @phpstan-method Route route(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool|array<string, mixed> $route_config = false, string $alias = '')
  * @phpstan-method void group(string $pattern, callable $callback, (class-string|callable|array{0: class-string, 1: string})[] $group_middlewares = [])
- * @phpstan-method Route post(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool $pass_route = false, string $alias = '')
- * @phpstan-method Route put(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool $pass_route = false, string $alias = '')
- * @phpstan-method Route patch(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool $pass_route = false, string $alias = '')
- * @phpstan-method Route delete(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool $pass_route = false, string $alias = '')
+ * @phpstan-method Route post(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool|array<string, mixed> $route_config = false, string $alias = '')
+ * @phpstan-method Route put(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool|array<string, mixed> $route_config = false, string $alias = '')
+ * @phpstan-method Route patch(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool|array<string, mixed> $route_config = false, string $alias = '')
+ * @phpstan-method Route delete(string $pattern, callable|string|array{0: class-string, 1: string} $callback, bool|array<string, mixed> $route_config = false, string $alias = '')
  * @phpstan-method void resource(string $pattern, class-string $controllerClass, array<string, string|array<string>> $methods = [])
  * @phpstan-method string getUrl(string $alias, array<string, mixed> $params = [])
  * @phpstan-method void before(string $name, Closure(array<int, mixed> &$params, string &$output): (void|false) $callback)
@@ -733,12 +733,12 @@ class Engine
      *
      * @param string $pattern URL pattern to match
      * @param callable|string $callback Callback function
-     * @param bool $pass_route Pass the matching route object to the callback
+     * @param bool|array<string, mixed> $route_config Pass the matching route object to the callback, or an array of config options.
      * @param string $alias The alias for the route
      */
-    public function _route(string $pattern, $callback, bool $pass_route = false, string $alias = ''): Route
+    public function _route(string $pattern, $callback, $route_config = false, string $alias = ''): Route
     {
-        return $this->router()->map($pattern, $callback, $pass_route, $alias);
+        return $this->router()->map($pattern, $callback, $route_config, $alias);
     }
 
     /**
@@ -758,13 +758,13 @@ class Engine
      *
      * @param string $pattern URL pattern to match
      * @param callable|string $callback Callback function or string class->method
-     * @param bool $pass_route Pass the matching route object to the callback
+     * @param bool|array<string, mixed> $route_config Pass the matching route object to the callback, or an array of config options.
      *
      * @return Route
      */
-    public function _post(string $pattern, $callback, bool $pass_route = false, string $route_alias = ''): Route
+    public function _post(string $pattern, $callback, $route_config = false, string $route_alias = ''): Route
     {
-        return $this->router()->map('POST ' . $pattern, $callback, $pass_route, $route_alias);
+        return $this->router()->map('POST ' . $pattern, $callback, $route_config, $route_alias);
     }
 
     /**
@@ -772,13 +772,13 @@ class Engine
      *
      * @param string $pattern URL pattern to match
      * @param callable|string $callback Callback function or string class->method
-     * @param bool $pass_route Pass the matching route object to the callback
+     * @param bool|array<string, mixed> $route_config Pass the matching route object to the callback, or an array of config options.
      *
      * @return Route
      */
-    public function _put(string $pattern, $callback, bool $pass_route = false, string $route_alias = ''): Route
+    public function _put(string $pattern, $callback, $route_config = false, string $route_alias = ''): Route
     {
-        return $this->router()->map('PUT ' . $pattern, $callback, $pass_route, $route_alias);
+        return $this->router()->map('PUT ' . $pattern, $callback, $route_config, $route_alias);
     }
 
     /**
@@ -786,13 +786,13 @@ class Engine
      *
      * @param string $pattern URL pattern to match
      * @param callable|string $callback Callback function or string class->method
-     * @param bool $pass_route Pass the matching route object to the callback
+     * @param bool|array<string, mixed> $route_config Pass the matching route object to the callback, or an array of config options.
      *
      * @return Route
      */
-    public function _patch(string $pattern, $callback, bool $pass_route = false, string $route_alias = ''): Route
+    public function _patch(string $pattern, $callback, $route_config = false, string $route_alias = ''): Route
     {
-        return $this->router()->map('PATCH ' . $pattern, $callback, $pass_route, $route_alias);
+        return $this->router()->map('PATCH ' . $pattern, $callback, $route_config, $route_alias);
     }
 
     /**
@@ -800,13 +800,13 @@ class Engine
      *
      * @param string $pattern URL pattern to match
      * @param callable|string $callback Callback function or string class->method
-     * @param bool $pass_route Pass the matching route object to the callback
+     * @param bool|array<string, mixed> $route_config Pass the matching route object to the callback, or an array of config options.
      *
      * @return Route
      */
-    public function _delete(string $pattern, $callback, bool $pass_route = false, string $route_alias = ''): Route
+    public function _delete(string $pattern, $callback, $route_config = false, string $route_alias = ''): Route
     {
-        return $this->router()->map('DELETE ' . $pattern, $callback, $pass_route, $route_alias);
+        return $this->router()->map('DELETE ' . $pattern, $callback, $route_config, $route_alias);
     }
 
     /**

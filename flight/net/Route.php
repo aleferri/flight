@@ -56,6 +56,13 @@ class Route
     public bool $pass = false;
 
     /**
+     * Additional configuration for the route (used by middleware, etc.)
+     *
+     * @var array<string, mixed>
+     */
+    public array $config = [];
+
+    /**
      * The alias is a way to identify the route using a simple name ex: 'login' instead of /admin/login
      */
     public string $alias = '';
@@ -83,14 +90,15 @@ class Route
      * @param string $pattern  URL pattern
      * @param callable|string  $callback Callback function
      * @param array<int, string>  $methods  HTTP methods
-     * @param bool   $pass     Pass self in callback parameters
+     * @param array<string, mixed> $config Additional configuration for the route
      */
-    public function __construct(string $pattern, $callback, array $methods, bool $pass, string $alias = '')
+    public function __construct(string $pattern, $callback, array $methods, array $config = [], string $alias = '')
     {
         $this->pattern = str_replace('//', '/', $pattern);
         $this->callback = $callback;
         $this->methods = $methods;
-        $this->pass = $pass;
+        $this->config = $config;
+        $this->pass = !empty($config['pass_route']);
         $this->alias = $alias;
     }
 
